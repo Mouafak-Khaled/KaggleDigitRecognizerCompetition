@@ -8,6 +8,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from torch.utils.data import Dataset
 import torchvision.transforms as T
+from torchvision.transforms.functional import adjust_contrast, adjust_sharpness
 from torchvision.utils import save_image
 import torchvision.transforms.functional as F
 from preprocessing import *
@@ -55,6 +56,12 @@ class DigitMnistDataset(Dataset):
         plt.show()
 
     
+    def classes(self):
+        if self.mode == 'train':
+            return np.unique(self.labels)
+        
+    
+    
     def data_path(self, path):
         if path == None:
             path = os.path.join(DigitMnistDataset.DEFAULT_PATH,
@@ -84,15 +91,19 @@ class DigitMnistDataset(Dataset):
     def __getitem__(self, index):
         img = self.images[index].reshape(self._img_shape) 
         # denoised_img = cv2.medianBlur(img.astype('float32'), 3)
+
         
         if self.transforms:
             img = self.transforms(img)
+        
+        img = adjust_contrast(img, contrast_factor=2)
+        img = adjust_sharpness(img, sharpness_factor=2)
         
         if self.mode == 'train':
             label = self.labels[index]
             return img, label
         else:
-            return img, label
+            return img
         
         
     
