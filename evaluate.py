@@ -28,3 +28,25 @@ def evaluate(model, data_loader, criterion, device):
     # print(f'Epoch: {epoch} | Accuracy: {accuracy:.2f}%')
     
     return accuracy, val_loss
+
+
+
+def predictions(model, data_loader, device):
+    
+    model.eval()    
+    model.zero_grad(set_to_none=True)
+    y_pred = []
+    for imgs in data_loader:
+            
+        imgs = imgs.to(device, dtype=torch.float)
+       
+        with torch.set_grad_enabled(False):
+
+            outputs = model(imgs)
+            _, yhats = torch.max(outputs, 1)
+            y_pred.extend(yhats.detach().tolist())
+            
+    
+    return y_pred
+         
+    

@@ -23,11 +23,7 @@ class DigitMnistDataset(Dataset):
         self.check_mode()
         self.path = self.data_path(path)
         self.transforms = transforms
-        if self.mode == 'train':
-            self.images, self.labels = self._data()
-        else:
-            self.images = self._data()
-            
+        self.images, self.labels = self._data()
         self._img_shape = (28, 28)
         
         
@@ -73,15 +69,15 @@ class DigitMnistDataset(Dataset):
     
        
     def _data(self):
-        if self.mode == 'train':
-            data = pd.read_csv(self.path)
+        
+        data = pd.read_csv(self.path)
+        if 'label' in data.columns:
             labels = data.label.to_numpy()
             images = data.drop(columns=['label']).to_numpy()
             return images, labels
-
         else:
             images = pd.read_csv(self.path).to_numpy()
-            return images
+            return images, None
          
     
     def __len__(self):
@@ -99,7 +95,7 @@ class DigitMnistDataset(Dataset):
         img = adjust_contrast(img, contrast_factor=2)
         img = adjust_sharpness(img, sharpness_factor=2)
         
-        if self.mode == 'train':
+        if self.labels is not None:
             label = self.labels[index]
             return img, label
         else:
