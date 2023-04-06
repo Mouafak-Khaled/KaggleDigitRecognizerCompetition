@@ -13,93 +13,61 @@ from torchvision.utils import save_image
 import torchvision.transforms.functional as F
 from preprocessing import *
 
+from torchvision.datasets import MNIST
+
+
 class DigitMnistDataset(Dataset):
     
-    DEFAULT_PATH = os.path.join(os.getcwd(), 'dataset')
     
-    def __init__(self, mode, path=None, transforms=None):
+    def __init__(self, path, mode, transform=None):
         
-        self.mode = mode.lower()
-        self.check_mode()
-        self.path = self.data_path(path)
-        self.transforms = transforms
-        self.images, self.labels = self._data()
-        self._img_shape = (28, 28)
+        self.path = path       
+        self.transform = transform
+        self.dataset = MNIST(self.path,
+                             download=False,
+                             train=(mode.lower() == 'train'),
+                             transform=None)
+
         
-        
-    def check_mode(self):
-        if self.mode not in ['train', 'test']:
-            raise ValueError("mode value is invalid!")
+    def labels(self):
+        return self.dataset.targets.numpy()
     
     
     def plot_label_distribution(self):
         
-        if self.mode == 'train':
-            figure = plt.figure(figsize=(8, 6))
-            sns.histplot(data=self.labels)
-            plt.xticks(np.unique(self.labels))
-            plt.ylabel("Frequency")
-            plt.xlabel("Labels")
-            plt.show()
+        figure = plt.figure(figsize=(8, 6))
+        sns.histplot(data=self.labels())
+        plt.xticks(np.unique(self.labels()))
+        plt.ylabel("Frequency")
+        plt.xlabel("Labels")
+        plt.show()
         
     
     def display_sample_images(self):
         
-        indecis = np.random.randint(low=0, high=len(self.images), size=2)
+        indecis = np.random.randint(low=0, high=len(self.dataset), size=2)
         figure, ax = plt.subplots(1, 2)
-        ax[0].imshow(self.images[indecis[0]].reshape(self._img_shape))
-        ax[1].imshow(self.images[indecis[1]].reshape(self._img_shape))
+        ax[0].imshow((self.transform(self.dataset[indecis[0]][0])).permute(1, 2, 0))
+        ax[1].imshow((self.transform(self.dataset[indecis[1]][0])).permute(1, 2, 0))
         plt.show()
-
-    
-    def classes(self):
-        if self.mode == 'train':
-            return np.unique(self.labels)
-        
-    
-    
-    def data_path(self, path):
-        if path == None:
-            path = os.path.join(DigitMnistDataset.DEFAULT_PATH,
-                                self.mode + '.csv')
-        else:
-            path = os.path.join(path, self.mode + '.csv')
-            
-        return path
-    
-       
-    def _data(self):
-        
-        data = pd.read_csv(self.path)
-        if 'label' in data.columns:
-            labels = data.label.to_numpy()
-            images = data.drop(columns=['label']).to_numpy()
-            return images, labels
-        else:
-            images = pd.read_csv(self.path).to_numpy()
-            return images, None
-         
+     
     
     def __len__(self):
-        return len(self.images) 
+        return len(self.dataset) 
     
     
     def __getitem__(self, index):
-        img = self.images[index].reshape(self._img_shape) 
+        img , target= self.dataset[index] 
         # denoised_img = cv2.medianBlur(img.astype('float32'), 3)
-
-        
-        if self.transforms:
-            img = self.transforms(img)
-        
         img = adjust_contrast(img, contrast_factor=2)
         img = adjust_sharpness(img, sharpness_factor=2)
         
-        if self.labels is not None:
-            label = self.labels[index]
-            return img, label
-        else:
-            return img
+        if self.transform:
+            img = self.transform(img)
+        
+        
+       
+        return img, target
         
         
     

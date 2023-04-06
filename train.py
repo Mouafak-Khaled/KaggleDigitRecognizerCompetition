@@ -28,9 +28,8 @@ def train(model, optimizer, train_loader, validation_loader, criterion, epochs,
         epoch_tic = time.time()
         train_acc, num_corrects, num_samples = 0, 0, 0
         model.zero_grad(set_to_none=True)
-
+      
         for img, label in tqdm(train_loader):
-
             img = img.to(device, non_blocking=True)
             label = label.type(torch.LongTensor).to(device, non_blocking=True)
             with torch.cuda.amp.autocast():
@@ -55,10 +54,10 @@ def train(model, optimizer, train_loader, validation_loader, criterion, epochs,
       
         
         if scheduler != None:
-            # if isinstance(scheduler, ('ReduceLROnPlateau')):
-            #     scheduler.step(val_loss) 
-            # else:
-            scheduler.step() 
+            if isinstance(scheduler, (ReduceLROnPlateau)):
+                scheduler.step(val_loss) 
+            else:
+                scheduler.step() 
                 
         
         epoch_toc = time.time()
