@@ -29,8 +29,8 @@ class ModelLayer(nn.Module):
         self.conv = nn.Conv2d(in_channels, out_channels, kernel_size=3, bias=bias)
         self.bn = nn.BatchNorm2d(out_channels)
         self.relu = nn.ReLU()
-        self.mp = None
-        self.dropoutLayer = None
+        self.mp = nn.MaxPool2d(kernel_size=(2, 2), stride=(2, 2))
+        self.dropoutLayer = nn.Dropout2d(p=self.dropout)
         self.init_weights()
     
     
@@ -47,13 +47,11 @@ class ModelLayer(nn.Module):
         x = self.bn(self.conv(x))
         
         if self.pool is True:
-            self.mp = nn.MaxPool2d(kernel_size=(2, 2), stride=(2, 2))
             x = self.mp(x)
             
         x = self.relu(x)
         
         if self.dropout > 0.0:
-            self.dropoutLayer = nn.Dropout2d(p=self.dropout)
             x = self.dropoutLayer(x)
         
         return x
@@ -77,16 +75,16 @@ class DigitRecognizer(nn.Module):
             else:
                 self.pool=True
         
-        
+            print(self.pool, self.dropout)
             self.model_list.append(ModelLayer(self.in_channels,
                                           self.out_channels,
                                           bias=self.bias,
                                           pool=self.pool,
                                           dropout=self.dropout))
             
-            # self.model_list.append(ResidualBlock(in_channels=self.out_channels,
-            #                                      out_channels=self.out_channels,
-            #                                      bias=self.bias))
+            self.model_list.append(ResidualBlock(in_channels=self.out_channels,
+                                                 out_channels=self.out_channels,
+                                                 bias=self.bias))
 
             self.in_channels = self.out_channels
             if i == 3:
