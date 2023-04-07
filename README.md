@@ -8,7 +8,7 @@ This project aims to provide a solution to the Kaggle Digit Recognizer Challenge
 
 # The Architecture of DigitRecognizer:
 
-##Residual Block:
+## Residual Block:
 * A 2D convolution Layer
   * Kernel Size: 3 x 3
   * Padding: 1
@@ -21,7 +21,7 @@ This project aims to provide a solution to the Kaggle Digit Recognizer Challenge
 * ReLU Activataion
 * Skip Connection
 
-##1. First Layer:
+## 1. First Layer:
 
 * A 2D convolution layer:
   * Kernel size of 3 x 3.
@@ -29,7 +29,7 @@ This project aims to provide a solution to the Kaggle Digit Recognizer Challenge
 * Batch normalization
 * ReLU Activation
 
-##2.  Second Layer:
+## 2.  Second Layer:
 
 * A 2D convolution layer:
   * Kernel size of 3 x 3.
